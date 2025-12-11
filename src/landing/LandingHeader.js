@@ -66,31 +66,18 @@ function LandingHeader() {
             (isDark ? "text-slate-200" : "text-slate-700")
           }
         >
-          <a
-            href="#services"
-            className="hover:text-sky-500 transition-colors whitespace-nowrap"
-          >
-            {t.nav_services}
-          </a>
-          <a
-            href="#process"
-            className="hover:text-sky-500 transition-colors whitespace-nowrap"
-          >
-            {t.nav_process}
-          </a>
-          <a
-            href="#about"
-            className="hover:text-sky-500 transition-colors whitespace-nowrap"
-          >
-            {t.nav_about}
-          </a>
           <Link
             to="/booking"
             className="hover:text-sky-500 transition-colors whitespace-nowrap"
           >
             {lang === "en" ? "Booking demo" : "Démo rendez-vous"}
           </Link>
-
+          <Link
+            to="/quotes"
+            className="hover:text-sky-500 transition-colors whitespace-nowrap"
+          >
+            {lang === "en" ? "Quote demo" : "Démo soumissions"}
+          </Link>
           <a
             href="#contact"
             className={
@@ -200,27 +187,6 @@ function LandingHeader() {
                 }
               >
                 <nav className="px-4 py-4 flex flex-col gap-2 text-sm">
-                  <a
-                    href="#services"
-                    onClick={() => setMobileOpen(false)}
-                    className="py-2 border-b border-slate-200/40 dark:border-slate-800/60"
-                  >
-                    {t.nav_services}
-                  </a>
-                  <a
-                    href="#process"
-                    onClick={() => setMobileOpen(false)}
-                    className="py-2 border-b border-slate-200/40 dark:border-slate-800/60"
-                  >
-                    {t.nav_process}
-                  </a>
-                  <a
-                    href="#about"
-                    onClick={() => setMobileOpen(false)}
-                    className="py-2 border-b border-slate-200/40 dark:border-slate-800/60"
-                  >
-                    {t.nav_about}
-                  </a>
                   <Link
                     to="/booking"
                     onClick={() => setMobileOpen(false)}
@@ -228,7 +194,12 @@ function LandingHeader() {
                   >
                     {lang === "en" ? "Booking demo" : "Démo rendez-vous"}
                   </Link>
-
+                  <Link
+                    to="/quotes"
+                    className="hover:text-sky-500 transition-colors whitespace-nowrap"
+                  >
+                    {lang === "en" ? "Quote demo" : "Démo soumissions"}
+                  </Link>
                   <a
                     href="#contact"
                     onClick={() => setMobileOpen(false)}
