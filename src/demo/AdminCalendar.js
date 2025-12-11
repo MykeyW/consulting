@@ -1,4 +1,4 @@
-// src/AdminCalendar.js
+// src/demo/AdminCalendar.js
 import React from "react";
 
 function startOfDay(date) {
@@ -27,9 +27,10 @@ export default function AdminCalendar({
 }) {
   return (
     <>
+      {/* Header */}
       <div className="flex items-center justify-between mb-3">
         <div>
-          <p className="text-xs uppercase tracking-[0.16em] text-slate-400">
+          <p className="text-xs uppercase tracking-[0.16em] text-slate-400 dark:text-slate-400">
             {copy.pickDateLabel}
           </p>
           <p className="text-lg md:text-xl font-semibold mt-1">
@@ -38,7 +39,8 @@ export default function AdminCalendar({
         </div>
       </div>
 
-      <div className="grid grid-cols-7 gap-2 mb-2 text-[11px] md:text-xs text-slate-400">
+      {/* Day names row */}
+      <div className="grid grid-cols-7 gap-2 mb-2 text-[11px] md:text-xs text-slate-400 dark:text-slate-500">
         {dayNames.map((d) => (
           <div
             key={d}
@@ -49,6 +51,7 @@ export default function AdminCalendar({
         ))}
       </div>
 
+      {/* Calendar cells */}
       <div className="grid grid-cols-7 gap-2">
         {cells.map((date, idx) => {
           if (!date) {

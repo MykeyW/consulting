@@ -1,108 +1,64 @@
-// src/AdminBookingPanel.js
+// src/demo/AdminBookingPanel.js
 import React from "react";
-import { IconMap } from "./icons";
+import { IconMap } from "../icons";
 import BookingEmailPreview from "./BookingEmailPreview";
 
 // PDF libs
 import jsPDF from "jspdf";
 import autoTable from "jspdf-autotable";
 
-// NEW child components
+// Child components
 import AdminCalendar from "./AdminCalendar";
 import AdminDayOverviewCard from "./AdminDayOverviewCard";
 import AdminBookingsTable from "./AdminBookingsTable";
 import AdminUpcomingBookings from "./AdminUpcomingBookings";
-
-const slotTimes = ["09:00", "10:00", "13:00", "14:00", "15:30"];
-
-function startOfDay(date) {
-  const d = new Date(date);
-  d.setHours(0, 0, 0, 0);
-  return d;
-}
-
-function dateKey(date) {
-  return date.toISOString().slice(0, 10);
-}
-
-export { dateKey, startOfDay, slotTimes }; // handy if you ever want to reuse
+import { useLangTheme } from "../landing/LangThemeProvider";
+import { slotTimes } from "./demoPalettes"; // if you exported helpers from there
+import { startOfDay, dateKey } from "./demoTimeUtils";
 
 export default function AdminBookingPanel({
-  lang,
   palette,
   availability,
-  onCancelBooking, // 👈 NEW – callback from BookingDemo
+  onCancelBooking,
 }) {
+  const { lang, t } = useLangTheme();
+
+  // Map translations -> local copy object for children
   const copy = {
-    en: {
-      adminTitle: "Admin view – bookings overview",
-      adminSub:
-        "Click a date to see who booked, which times are still open, and a sample email summary.",
-      pickDateLabel: "Pick a date",
-      monthLabelPrefix: "",
-      todayLabel: "Today",
-      fullLabel: "Full",
-      slotsLabel: "slots",
-      oneSlotLabel: "slot",
-      noDateSelected:
-        "Choose a date on the left to inspect its bookings and availability.",
-      statsTitle: "Day overview",
-      totalSlots: "Total slots",
-      bookedSlots: "Booked",
-      remainingSlots: "Remaining",
-      bookingsTitle: "Bookings for this date",
-      timeCol: "Time",
-      nameCol: "Name",
-      emailCol: "Email",
-      statusCol: "Status",
-      statusBooked: "Booked",
-      statusAvailable: "Available",
-      cancelLabel: "Cancel booking",
-      upcomingTitle: "Next 7 days – upcoming bookings",
-      upcomingEmpty:
-        "No demo bookings yet. In production you’d see all upcoming appointments here.",
-      exportPdf: "Export PDF (demo)",
-      pdfTitlePrefix: "Bookings –",
-      pdfSectionDay: "Day overview",
-      pdfSectionBookings: "Bookings for this date",
-      pdfSectionUpcoming: "Next 7 days – upcoming bookings",
-      pdfNoDate: "No date selected – nothing to export.",
-    },
-    fr: {
-      adminTitle: "Vue admin – aperçu des réservations",
-      adminSub:
-        "Cliquez sur une date pour voir qui a réservé, les heures encore libres et un exemple de courriel.",
-      pickDateLabel: "Choisissez une date",
-      monthLabelPrefix: "",
-      todayLabel: "Aujourd’hui",
-      fullLabel: "Complet",
-      slotsLabel: "plages",
-      oneSlotLabel: "plage",
-      noDateSelected:
-        "Choisissez une date à gauche pour voir ses réservations et disponibilités.",
-      statsTitle: "Aperçu de la journée",
-      totalSlots: "Plages totales",
-      bookedSlots: "Réservées",
-      remainingSlots: "Restantes",
-      bookingsTitle: "Réservations pour cette date",
-      timeCol: "Heure",
-      nameCol: "Nom",
-      emailCol: "Courriel",
-      statusCol: "Statut",
-      statusBooked: "Réservé",
-      statusAvailable: "Disponible",
-      cancelLabel: "Annuler",
-      upcomingTitle: "7 prochains jours – réservations à venir",
-      upcomingEmpty:
-        "Aucune réservation de démo pour l’instant. En production, vous verriez vos rendez-vous ici.",
-      exportPdf: "Exporter en PDF (démo)",
-      pdfTitlePrefix: "Réservations –",
-      pdfSectionDay: "Aperçu de la journée",
-      pdfSectionBookings: "Réservations pour cette date",
-      pdfSectionUpcoming: "7 prochains jours – réservations à venir",
-      pdfNoDate: "Aucune date sélectionnée – rien à exporter.",
-    },
-  }[lang || "en"];
+    adminTitle: t.booking_admin_title,
+    adminSub: t.booking_admin_sub,
+
+    // REQUIRED for AdminCalendar — MUST point to booking calendar translations
+    pickDateLabel: t.booking_pick_date_label,
+    monthLabelPrefix: t.booking_month_label_prefix,
+    fullLabel: t.booking_full_label,
+    oneSlotLabel: t.booking_one_slot_label,
+    slotsLabel: t.booking_slots_label,
+    todayLabel: t.booking_today_label,
+
+    // Admin section translations
+    noDateSelected: t.booking_admin_no_date_selected,
+    statsTitle: t.booking_admin_stats_title,
+    totalSlots: t.booking_admin_total_slots,
+    bookedSlots: t.booking_admin_booked_slots,
+    remainingSlots: t.booking_admin_remaining_slots,
+    bookingsTitle: t.booking_admin_bookings_title,
+    timeCol: t.booking_admin_time_col,
+    nameCol: t.booking_admin_name_col,
+    emailCol: t.booking_admin_email_col,
+    statusCol: t.booking_admin_status_col,
+    statusBooked: t.booking_admin_status_booked,
+    statusAvailable: t.booking_admin_status_available,
+    cancelLabel: t.booking_admin_cancel_label,
+    upcomingTitle: t.booking_admin_upcoming_title,
+    upcomingEmpty: t.booking_admin_upcoming_empty,
+    exportPdf: t.booking_admin_export_pdf,
+    pdfTitlePrefix: t.booking_admin_pdf_title_prefix,
+    pdfSectionDay: t.booking_admin_pdf_section_day,
+    pdfSectionBookings: t.booking_admin_pdf_section_bookings,
+    pdfSectionUpcoming: t.booking_admin_pdf_section_upcoming,
+    pdfNoDate: t.booking_admin_pdf_no_date,
+  };
 
   const [currentMonth] = React.useState(() => {
     const now = new Date();
@@ -193,7 +149,7 @@ export default function AdminBookingPanel({
   const mutedText = palette.mutedText || "text-slate-500";
   const labelText = palette.labelText || "text-slate-800";
 
-  // ---------------- PDF EXPORT HANDLER ----------------
+  // PDF EXPORT
   const handleExportPdf = () => {
     if (!selectedDate) {
       alert(copy.pdfNoDate);
@@ -206,7 +162,6 @@ export default function AdminBookingPanel({
       { weekday: "long", year: "numeric", month: "long", day: "numeric" }
     );
 
-    // Title
     doc.setFontSize(16);
     doc.text(`${copy.pdfTitlePrefix} ${dateLabel}`, 14, 18);
 
@@ -242,12 +197,11 @@ export default function AdminBookingPanel({
         ];
       }),
       styles: { fontSize: 9 },
-      headStyles: { fillColor: [33, 150, 243] },
     });
 
     nextY = doc.lastAutoTable ? doc.lastAutoTable.finalY + 8 : nextY + 20;
 
-    // Upcoming bookings (if any)
+    // Upcoming bookings
     doc.setFontSize(12);
     doc.text(copy.pdfSectionUpcoming, 14, nextY);
     nextY += 4;
@@ -276,7 +230,6 @@ export default function AdminBookingPanel({
     const fileNameSafe = dateKey(selectedDate);
     doc.save(`bookings-${fileNameSafe}.pdf`);
   };
-  // ---------------- END PDF EXPORT HANDLER ----------------
 
   const header = (
     <div className="flex flex-col md:flex-row md:items-center md:justify-between gap-3 mb-4 md:mb-6">
@@ -290,7 +243,6 @@ export default function AdminBookingPanel({
         </p>
       </div>
 
-      {/* Export PDF button */}
       <div className="flex items-center gap-2">
         <button
           type="button"
@@ -313,9 +265,7 @@ export default function AdminBookingPanel({
     >
       {header}
 
-      {/* Main 2-column layout */}
       <div className="flex flex-col lg:flex-row gap-6">
-        {/* Calendar column */}
         <div className="lg:w-1/2">
           <AdminCalendar
             lang={lang}
@@ -333,7 +283,6 @@ export default function AdminBookingPanel({
           />
         </div>
 
-        {/* Details + email column */}
         <div className="lg:w-1/2 flex flex-col gap-4">
           <AdminDayOverviewCard
             lang={lang}
@@ -354,7 +303,7 @@ export default function AdminBookingPanel({
             infoForSelected={infoForSelected}
             slotTimes={slotTimes}
             selectedDayKey={selectedDate ? dateKey(selectedDate) : null}
-            onCancelBooking={onCancelBooking} // 👈 where cancel logic is hooked
+            onCancelBooking={onCancelBooking}
           />
 
           <div className="grid grid-cols-1 gap-4">
@@ -366,9 +315,7 @@ export default function AdminBookingPanel({
               upcomingBookings={upcomingBookings}
             />
 
-            {/* Morning email preview using REAL data + palette */}
             <BookingEmailPreview
-              lang={lang}
               palette={palette}
               selectedDate={selectedDate}
               infoForSelected={infoForSelected}

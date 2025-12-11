@@ -1,64 +1,23 @@
-// src/BookingEmailPreview.js
+// src/demo/BookingEmailPreview.js
 import React from "react";
-import { IconEnvelope } from "./icons";
+import { IconEnvelope } from "../icons";
+import { useLangTheme } from "../landing/LangThemeProvider";
 
 export default function BookingEmailPreview({
-  lang = "en",
   palette,
   selectedDate,
   infoForSelected,
   slotTimes = [],
 }) {
-  const copy = {
-    en: {
-      title: "Morning email – today’s schedule",
-      emptyTitle: "Morning email – no date selected",
-      intro:
-        "Here’s a quick summary of your bookings for this day. You’ll get this automatically every morning.",
-      noDateIntro:
-        "Pick a date on the left to see what the owner’s morning email would look like.",
-      subjectPrefix: "Subject:",
-      subject: "Today’s bookings and remaining availability",
-      dateLabel: "Date",
-      totalSlots: "Total slots",
-      bookedSlots: "Booked",
-      remainingSlots: "Remaining",
-      bookedSectionTitle: "Booked time slots",
-      noneBooked: "No bookings yet for this date.",
-      openSlotsTitle: "Open time slots",
-      openBadge: "open",
-      bookedBadge: "booked",
-      footerNote:
-        "In a real system, this email would be sent automatically every morning with up-to-date data.",
-    },
-    fr: {
-      title: "Courriel du matin – horaire du jour",
-      emptyTitle: "Courriel du matin – aucune date choisie",
-      intro:
-        "Voici un résumé rapide de vos réservations pour cette journée. Vous recevriez ceci automatiquement chaque matin.",
-      noDateIntro:
-        "Choisissez une date à gauche pour voir à quoi ressemblerait le courriel matinal du commerçant.",
-      subjectPrefix: "Objet :",
-      subject: "Réservations du jour et disponibilités restantes",
-      dateLabel: "Date",
-      totalSlots: "Plages totales",
-      bookedSlots: "Réservées",
-      remainingSlots: "Restantes",
-      bookedSectionTitle: "Plages réservées",
-      noneBooked: "Aucune réservation pour cette date.",
-      openSlotsTitle: "Plages encore disponibles",
-      openBadge: "libre",
-      bookedBadge: "réservé",
-      footerNote:
-        "Dans un vrai système, ce courriel serait envoyé automatiquement chaque matin avec les données à jour.",
-    },
-  }[lang || "en"];
+  const { lang, t } = useLangTheme();
 
   const mutedText = palette?.mutedText || "text-slate-600";
   const labelText = palette?.labelText || "text-slate-800";
 
-  const cardBg = palette?.formPanelBg || "bg-white border border-slate-200"; // reuse the theme’s “card” look
-  const headerBg = palette?.saveBtnEnabled || "bg-sky-600 text-white"; // use primary button style as email header accent
+  // reuse the theme’s “card” look for the email preview
+  const cardBg = palette?.formPanelBg || "bg-white border border-slate-200";
+  // use primary button style as email header accent
+  const headerBg = palette?.saveBtnEnabled || "bg-sky-600 text-white";
 
   const hasDate = !!selectedDate && !!infoForSelected;
   const totalSlots = infoForSelected?.totalSlots ?? (slotTimes?.length || 0);
@@ -86,7 +45,9 @@ export default function BookingEmailPreview({
       >
         <div className="flex items-center gap-2">
           <IconEnvelope className="h-4 w-4" />
-          <span>{hasDate ? copy.title : copy.emptyTitle}</span>
+          <span>
+            {hasDate ? t.booking_email_title : t.booking_email_empty_title}
+          </span>
         </div>
         <span className="opacity-80">demo@your-business.com</span>
       </div>
@@ -95,12 +56,16 @@ export default function BookingEmailPreview({
       <div className="px-3 py-3 md:px-4 md:py-4 space-y-3">
         {/* Subject line */}
         <p className={"text-[11px] " + mutedText}>
-          <span className="font-semibold">{copy.subjectPrefix}</span>{" "}
-          {copy.subject}
+          <span className="font-semibold">
+            {t.booking_email_subject_prefix}
+          </span>{" "}
+          {t.booking_email_subject}
         </p>
 
         {/* Intro */}
-        <p className={mutedText}>{hasDate ? copy.intro : copy.noDateIntro}</p>
+        <p className={mutedText}>
+          {hasDate ? t.booking_email_intro : t.booking_email_no_date_intro}
+        </p>
 
         {/* Only show real content if we have a date + info */}
         {hasDate && (
@@ -109,22 +74,28 @@ export default function BookingEmailPreview({
             <div className="rounded-xl border border-white/20 bg-white/40 dark:bg-black/20 px-3 py-2.5 md:px-3.5 md:py-3 flex flex-col gap-2">
               <div className="flex justify-between items-center gap-2">
                 <span className={"text-[11px] font-semibold " + labelText}>
-                  {copy.dateLabel}
+                  {t.booking_email_date_label}
                 </span>
                 <span className="font-medium">{dateLabel}</span>
               </div>
 
               <div className="flex flex-wrap gap-3 text-[11px] md:text-xs">
                 <div className="flex flex-col">
-                  <span className={mutedText}>{copy.totalSlots}</span>
+                  <span className={mutedText}>
+                    {t.booking_email_total_slots}
+                  </span>
                   <span className="font-semibold">{totalSlots}</span>
                 </div>
                 <div className="flex flex-col">
-                  <span className={mutedText}>{copy.bookedSlots}</span>
+                  <span className={mutedText}>
+                    {t.booking_email_booked_slots}
+                  </span>
                   <span className="font-semibold">{bookedCount}</span>
                 </div>
                 <div className="flex flex-col">
-                  <span className={mutedText}>{copy.remainingSlots}</span>
+                  <span className={mutedText}>
+                    {t.booking_email_remaining_slots}
+                  </span>
                   <span className="font-semibold">{remaining}</span>
                 </div>
               </div>
@@ -137,11 +108,13 @@ export default function BookingEmailPreview({
                   "text-[11px] md:text-xs font-semibold mb-1 " + labelText
                 }
               >
-                {copy.bookedSectionTitle}
+                {t.booking_email_booked_section_title}
               </p>
 
               {bookedCount === 0 ? (
-                <p className={"text-[11px] " + mutedText}>{copy.noneBooked}</p>
+                <p className={"text-[11px] " + mutedText}>
+                  {t.booking_email_none_booked}
+                </p>
               ) : (
                 <ul className="space-y-1.5">
                   {slotTimes.map((time) => {
@@ -182,7 +155,7 @@ export default function BookingEmailPreview({
                   "text-[11px] md:text-xs font-semibold mb-1 " + labelText
                 }
               >
-                {copy.openSlotsTitle}
+                {t.booking_email_open_slots_title}
               </p>
               <div className="flex flex-wrap gap-1.5">
                 {slotTimes.map((time) => {
@@ -197,7 +170,7 @@ export default function BookingEmailPreview({
                     >
                       {time}
                       <span className={"ml-1 " + mutedText}>
-                        · {copy.openBadge}
+                        · {t.booking_email_open_badge}
                       </span>
                     </span>
                   );
@@ -205,7 +178,7 @@ export default function BookingEmailPreview({
 
                 {remaining === 0 && (
                   <span className={"text-[11px] " + mutedText}>
-                    {copy.noneBooked}
+                    {t.booking_email_none_booked}
                   </span>
                 )}
               </div>
@@ -214,7 +187,9 @@ export default function BookingEmailPreview({
         )}
 
         {/* Footer note */}
-        <p className={"text-[10px] mt-1 " + mutedText}>{copy.footerNote}</p>
+        <p className={"text-[10px] mt-1 " + mutedText}>
+          {t.booking_email_footer_note}
+        </p>
       </div>
     </div>
   );
