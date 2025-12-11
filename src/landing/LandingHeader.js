@@ -3,6 +3,7 @@ import React from "react";
 import { Link } from "react-router-dom";
 import { IconPhone } from "../icons";
 import { useLangTheme } from "./LangThemeProvider";
+import indigoLogo from "../assets/inlogo.png"; // <-- your logo file
 
 function LandingHeader() {
   const {
@@ -28,15 +29,15 @@ function LandingHeader() {
       <div className="max-w-6xl mx-auto px-4 sm:px-6 py-3 flex items-center gap-4">
         {/* Brand */}
         <div className="flex items-center gap-3 min-w-0">
-          <div
-            className={
-              "h-11 w-11 rounded-xl flex items-center justify-center text-sm font-semibold " +
-              (isDark
-                ? "bg-slate-900 border border-slate-700 text-sky-300"
-                : "bg-slate-100 border border-slate-300 text-sky-700")
-            }
-          >
-            IN
+          <div className="h-11 w-11 flex-shrink-0">
+            <img
+              src={indigoLogo}
+              alt="Indigo Nord logo"
+              className={
+                "h-11 w-11 rounded-full object-cover shadow-sm border " +
+                (isDark ? "border-slate-700" : "border-slate-300")
+              }
+            />
           </div>
           <div className="flex flex-col leading-tight">
             <span
@@ -45,7 +46,8 @@ function LandingHeader() {
                 (isDark ? "text-slate-50" : "text-slate-900")
               }
             >
-              {t.brand}
+              {/* Hard-code brand so it’s always Indigo Nord */}
+              Indigo Nord
             </span>
             <span
               className={
