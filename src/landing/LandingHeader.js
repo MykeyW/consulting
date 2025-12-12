@@ -78,6 +78,14 @@ function LandingHeader() {
           >
             {lang === "en" ? "Quote demo" : "Démo soumissions"}
           </Link>
+          {/* NEW: Job report demo link */}
+          <Link
+            to="/job-reports"
+            className="hover:text-sky-500 transition-colors whitespace-nowrap"
+          >
+            {lang === "en" ? "Job report demo" : "Démo rapport avant/après"}
+          </Link>
+
           <a
             href="#contact"
             className={
@@ -196,10 +204,22 @@ function LandingHeader() {
                   </Link>
                   <Link
                     to="/quotes"
-                    className="hover:text-sky-500 transition-colors whitespace-nowrap"
+                    onClick={() => setMobileOpen(false)}
+                    className="py-2 border-b border-slate-200/40 dark:border-slate-800/60 hover:text-sky-500 transition-colors whitespace-nowrap"
                   >
                     {lang === "en" ? "Quote demo" : "Démo soumissions"}
                   </Link>
+                  {/* NEW: Job report demo – mobile */}
+                  <Link
+                    to="/job-reports"
+                    onClick={() => setMobileOpen(false)}
+                    className="py-2 border-b border-slate-200/40 dark:border-slate-800/60 hover:text-sky-500 transition-colors whitespace-nowrap"
+                  >
+                    {lang === "en"
+                      ? "Job report demo"
+                      : "Démo rapport avant/après"}
+                  </Link>
+
                   <a
                     href="#contact"
                     onClick={() => setMobileOpen(false)}

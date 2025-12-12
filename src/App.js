@@ -7,16 +7,20 @@ import BookingDemoPage from "./demo/BookingDemoPage";
 import QuoteDemoPage from "./quote/QuoteDemoPage";
 import { QuoteProvider } from "./quote/QuoteContext";
 
+// ⬇️ NEW
+import JobReportDemoPage from "./jobReport/JobReportDemoPage";
+
 function App() {
   return (
     <Router>
       <LangThemeProvider>
-        {/* 👇 Now the whole app can use useQuoteDemo */}
         <QuoteProvider>
           <Routes>
             <Route path="/" element={<LandingPage />} />
             <Route path="/booking" element={<BookingDemoPage />} />
             <Route path="/quotes" element={<QuoteDemoPage />} />
+            {/* ⬇️ NEW route */}
+            <Route path="/job-reports" element={<JobReportDemoPage />} />
           </Routes>
         </QuoteProvider>
       </LangThemeProvider>
