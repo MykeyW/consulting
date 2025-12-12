@@ -12,23 +12,24 @@ import AdminCalendar from "./AdminCalendar";
 import AdminDayOverviewCard from "./AdminDayOverviewCard";
 import AdminBookingsTable from "./AdminBookingsTable";
 import AdminUpcomingBookings from "./AdminUpcomingBookings";
+
 import { useLangTheme } from "../landing/LangThemeProvider";
-import { slotTimes } from "./demoPalettes"; // if you exported helpers from there
+import { slotTimes } from "./demoPalettes";
 import { startOfDay, dateKey } from "./demoTimeUtils";
 
 export default function AdminBookingPanel({
   palette,
   availability,
   onCancelBooking,
+  onOpenNoShow,
+  onSetBookingStatus,
 }) {
   const { lang, t } = useLangTheme();
 
-  // Map translations -> local copy object for children
   const copy = {
     adminTitle: t.booking_admin_title,
     adminSub: t.booking_admin_sub,
 
-    // REQUIRED for AdminCalendar — MUST point to booking calendar translations
     pickDateLabel: t.booking_pick_date_label,
     monthLabelPrefix: t.booking_month_label_prefix,
     fullLabel: t.booking_full_label,
@@ -36,28 +37,32 @@ export default function AdminBookingPanel({
     slotsLabel: t.booking_slots_label,
     todayLabel: t.booking_today_label,
 
-    // Admin section translations
     noDateSelected: t.booking_admin_no_date_selected,
-    statsTitle: t.booking_admin_stats_title,
     totalSlots: t.booking_admin_total_slots,
     bookedSlots: t.booking_admin_booked_slots,
     remainingSlots: t.booking_admin_remaining_slots,
     bookingsTitle: t.booking_admin_bookings_title,
-    timeCol: t.booking_admin_time_col,
-    nameCol: t.booking_admin_name_col,
-    emailCol: t.booking_admin_email_col,
-    statusCol: t.booking_admin_status_col,
+
     statusBooked: t.booking_admin_status_booked,
+    statusNoShow: t.booking_admin_status_noshow,
     statusAvailable: t.booking_admin_status_available,
-    cancelLabel: t.booking_admin_cancel_label,
+
+    markNoShow: t.booking_admin_mark_noshow,
+
     upcomingTitle: t.booking_admin_upcoming_title,
     upcomingEmpty: t.booking_admin_upcoming_empty,
+
     exportPdf: t.booking_admin_export_pdf,
     pdfTitlePrefix: t.booking_admin_pdf_title_prefix,
     pdfSectionDay: t.booking_admin_pdf_section_day,
     pdfSectionBookings: t.booking_admin_pdf_section_bookings,
     pdfSectionUpcoming: t.booking_admin_pdf_section_upcoming,
     pdfNoDate: t.booking_admin_pdf_no_date,
+
+    timeCol: t.booking_admin_time_col,
+    nameCol: t.booking_admin_name_col,
+    emailCol: t.booking_admin_email_col,
+    statusCol: t.booking_admin_status_col,
   };
 
   const [currentMonth] = React.useState(() => {
@@ -90,9 +95,8 @@ export default function AdminBookingPanel({
 
   const cells = [];
   for (let i = 0; i < startWeekday; i++) cells.push(null);
-  for (let day = 1; day <= daysInMonth; day++) {
+  for (let day = 1; day <= daysInMonth; day++)
     cells.push(new Date(year, month, day));
-  }
   while (cells.length % 7 !== 0) cells.push(null);
 
   const isSameDay = (d1, d2) =>
@@ -102,7 +106,6 @@ export default function AdminBookingPanel({
     d1.getMonth() === d2.getMonth() &&
     d1.getDate() === d2.getDate();
 
-  // Build a 7-day list of upcoming bookings from availability
   const upcomingBookings = React.useMemo(() => {
     if (!availability) return [];
     const now = startOfDay(new Date());
@@ -112,7 +115,7 @@ export default function AdminBookingPanel({
     const items = [];
 
     Object.entries(availability).forEach(([key, info]) => {
-      if (!info || !info.takenSlots || info.takenSlots.length === 0) return;
+      if (!info?.takenSlots?.length) return;
       const date = new Date(key + "T00:00:00");
       if (date < now || date > sevenDays) return;
 
@@ -129,9 +132,8 @@ export default function AdminBookingPanel({
     });
 
     items.sort((a, b) => {
-      if (a.date.getTime() !== b.date.getTime()) {
+      if (a.date.getTime() !== b.date.getTime())
         return a.date.getTime() - b.date.getTime();
-      }
       return a.time.localeCompare(b.time);
     });
 
@@ -149,7 +151,6 @@ export default function AdminBookingPanel({
   const mutedText = palette.mutedText || "text-slate-500";
   const labelText = palette.labelText || "text-slate-800";
 
-  // PDF EXPORT
   const handleExportPdf = () => {
     if (!selectedDate) {
       alert(copy.pdfNoDate);
@@ -165,7 +166,6 @@ export default function AdminBookingPanel({
     doc.setFontSize(16);
     doc.text(`${copy.pdfTitlePrefix} ${dateLabel}`, 14, 18);
 
-    // Day overview
     doc.setFontSize(12);
     doc.text(copy.pdfSectionDay, 14, 28);
 
@@ -178,7 +178,6 @@ export default function AdminBookingPanel({
 
     let nextY = doc.lastAutoTable ? doc.lastAutoTable.finalY + 8 : 50;
 
-    // Bookings table
     doc.setFontSize(12);
     doc.text(copy.pdfSectionBookings, 14, nextY);
     nextY += 4;
@@ -189,11 +188,19 @@ export default function AdminBookingPanel({
       body: slotTimes.map((time) => {
         const booking = infoForSelected?.bookings?.[time];
         const isBooked = !!booking;
+        const st = booking?.status || (isBooked ? "booked" : "available");
+        const stLabel =
+          st === "no_show"
+            ? copy.statusNoShow
+            : st === "booked"
+            ? copy.statusBooked
+            : copy.statusAvailable;
+
         return [
           time,
           isBooked ? booking.name || "(Demo guest)" : "—",
           isBooked ? booking.email || "demo@example.com" : "—",
-          isBooked ? copy.statusBooked : copy.statusAvailable,
+          stLabel,
         ];
       }),
       styles: { fontSize: 9 },
@@ -201,7 +208,6 @@ export default function AdminBookingPanel({
 
     nextY = doc.lastAutoTable ? doc.lastAutoTable.finalY + 8 : nextY + 20;
 
-    // Upcoming bookings
     doc.setFontSize(12);
     doc.text(copy.pdfSectionUpcoming, 14, nextY);
     nextY += 4;
@@ -231,31 +237,6 @@ export default function AdminBookingPanel({
     doc.save(`bookings-${fileNameSafe}.pdf`);
   };
 
-  const header = (
-    <div className="flex flex-col md:flex-row md:items-center md:justify-between gap-3 mb-4 md:mb-6">
-      <div>
-        <p className="text-xs uppercase tracking-[0.16em] text-slate-400 flex items-center gap-2">
-          <IconMap className="h-4 w-4" />
-          <span>{copy.adminTitle}</span>
-        </p>
-        <p className={"text-xs md:text-sm mt-2 max-w-2xl " + mutedText}>
-          {copy.adminSub}
-        </p>
-      </div>
-
-      <div className="flex items-center gap-2">
-        <button
-          type="button"
-          onClick={handleExportPdf}
-          className="inline-flex items-center gap-2 text-xs md:text-sm px-3 py-1.5 rounded-full border border-slate-300 bg-white/90 text-slate-800 hover:border-sky-500 hover:text-sky-700 hover:bg-sky-50"
-        >
-          <span>⬇</span>
-          <span>{copy.exportPdf}</span>
-        </button>
-      </div>
-    </div>
-  );
-
   return (
     <div
       className={
@@ -263,7 +244,29 @@ export default function AdminBookingPanel({
         panelBg
       }
     >
-      {header}
+      {/* Header */}
+      <div className="flex flex-col md:flex-row md:items-center md:justify-between gap-3 mb-4 md:mb-6">
+        <div>
+          <p className="text-xs uppercase tracking-[0.16em] text-slate-400 flex items-center gap-2">
+            <IconMap className="h-4 w-4" />
+            <span>{copy.adminTitle}</span>
+          </p>
+          <p className={"text-xs md:text-sm mt-2 max-w-2xl " + mutedText}>
+            {copy.adminSub}
+          </p>
+        </div>
+
+        <div className="flex items-center gap-2">
+          <button
+            type="button"
+            onClick={handleExportPdf}
+            className="inline-flex items-center gap-2 text-xs md:text-sm px-3 py-1.5 rounded-full border border-slate-300 bg-white/90 text-slate-800 hover:border-sky-500 hover:text-sky-700 hover:bg-sky-50"
+          >
+            <span>⬇</span>
+            <span>{copy.exportPdf}</span>
+          </button>
+        </div>
+      </div>
 
       <div className="flex flex-col lg:flex-row gap-6">
         <div className="lg:w-1/2">
@@ -283,7 +286,7 @@ export default function AdminBookingPanel({
           />
         </div>
 
-        <div className="lg:w-1/2 flex flex-col gap-4">
+        <div className="lg:w-1/2 flex flex-col gap-4 lg:sticky lg:top-24 self-start">
           <AdminDayOverviewCard
             lang={lang}
             copy={copy}
@@ -303,7 +306,8 @@ export default function AdminBookingPanel({
             infoForSelected={infoForSelected}
             slotTimes={slotTimes}
             selectedDayKey={selectedDate ? dateKey(selectedDate) : null}
-            onCancelBooking={onCancelBooking}
+            onOpenNoShow={onOpenNoShow}
+            onSetBookingStatus={onSetBookingStatus}
           />
 
           <div className="grid grid-cols-1 gap-4">

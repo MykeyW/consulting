@@ -5,6 +5,7 @@ import LandingPage from "./landing/LandingPage";
 import { LangThemeProvider } from "./landing/LangThemeProvider";
 import BookingDemoPage from "./demo/BookingDemoPage";
 import QuoteDemoPage from "./quote/QuoteDemoPage";
+import SmartNumberDemoPage from "./smartNumber/SmartNumberDemoPage";
 import { QuoteProvider } from "./quote/QuoteContext";
 
 // ⬇️ NEW
@@ -21,6 +22,7 @@ function App() {
             <Route path="/quotes" element={<QuoteDemoPage />} />
             {/* ⬇️ NEW route */}
             <Route path="/job-reports" element={<JobReportDemoPage />} />
+            <Route path="/smart-number" element={<SmartNumberDemoPage />} />
           </Routes>
         </QuoteProvider>
       </LangThemeProvider>

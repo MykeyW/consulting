@@ -10,17 +10,58 @@ export default function AdminBookingsTable({
   infoForSelected,
   slotTimes,
   selectedDayKey,
-  onCancelBooking,
+  onOpenNoShow,
+  onSetBookingStatus, // optional fallback
 }) {
+  const wrap =
+    "rounded-2xl px-4 py-3 md:px-5 md:py-4 border " +
+    "border-slate-200/70 bg-slate-50/80 " +
+    "dark:border-white/10 dark:bg-black/10";
+
+  const cardBase =
+    "rounded-2xl border px-3 py-3 md:px-4 md:py-3.5 transition " +
+    "border-slate-200/70 bg-white/85 " +
+    "dark:border-white/10 dark:bg-black/20";
+
+  const cardNoShow =
+    "border-rose-300/60 bg-rose-50/70 " +
+    "dark:border-rose-400/25 dark:bg-rose-500/10";
+
+  const timeText = "font-mono text-[11px] md:text-xs";
+  const nameText = "text-sm font-semibold truncate";
+  const subText = "text-[11px] truncate";
+
+  const badge =
+    "inline-flex items-center gap-2 rounded-full border px-2 py-0.5 text-[11px] font-semibold";
+
+  const badgeNoShow =
+    badge +
+    " border-rose-500/20 bg-rose-500/10 text-rose-700 dark:text-rose-100";
+
+  const badgeBooked =
+    badge +
+    " border-amber-500/20 bg-amber-500/10 text-amber-800 dark:text-amber-100";
+
+  const btn =
+    "inline-flex items-center justify-center rounded-full px-3 py-1.5 " +
+    "text-[11px] md:text-xs font-semibold border transition whitespace-nowrap";
+
+  const btnNoShow =
+    btn +
+    " border-rose-500 bg-rose-600 text-white hover:bg-rose-500 " +
+    "dark:border-rose-400 dark:bg-rose-500 dark:text-slate-950 dark:hover:bg-rose-400";
+
+  function fireNoShow(dayKey, time) {
+    // Prefer onOpenNoShow (directly opens drawer and prepares message)
+    if (onOpenNoShow && dayKey) return onOpenNoShow(dayKey, time);
+
+    // Fallback if something is wired to onSetBookingStatus instead
+    if (onSetBookingStatus && dayKey)
+      return onSetBookingStatus(dayKey, time, "no_show");
+  }
+
   return (
-    <div
-      className={
-        "rounded-2xl px-4 py-3 md:px-5 md:py-4 border " +
-        // light / dark friendly container
-        "border-slate-200/70 bg-slate-50/80 " +
-        "dark:border-white/10 dark:bg-black/10"
-      }
-    >
+    <div className={wrap}>
       <p
         className={
           "text-xs font-semibold mb-2 flex items-center gap-2 " + labelText
@@ -30,76 +71,123 @@ export default function AdminBookingsTable({
         <span>{copy.bookingsTitle}</span>
       </p>
 
-      {selectedDate && infoForSelected ? (
-        <div className="max-h-48 overflow-auto rounded-xl border border-slate-200/70 bg-white/90 dark:border-white/10 dark:bg-black/20 text-xs md:text-sm">
-          <table className="w-full border-collapse">
-            <thead className="bg-slate-100/90 dark:bg-black/30 text-[11px] uppercase tracking-wide">
-              <tr>
-                <th className="px-2 py-1 text-left font-medium">
-                  {copy.timeCol}
-                </th>
-                <th className="px-2 py-1 text-left font-medium">
-                  {copy.nameCol}
-                </th>
-                <th className="px-2 py-1 text-left font-medium hidden md:table-cell">
-                  {copy.emailCol}
-                </th>
-                <th className="px-2 py-1 text-left font-medium">
-                  {copy.statusCol}
-                </th>
-              </tr>
-            </thead>
-            <tbody>
-              {slotTimes.map((time) => {
-                const booking = infoForSelected.bookings?.[time];
-                const isBooked = !!booking;
-
-                return (
-                  <tr
-                    key={time}
-                    className="border-t border-slate-200/60 dark:border-white/5 odd:bg-slate-50/80 dark:odd:bg-black/15"
-                  >
-                    <td className="px-2 py-1 font-mono text-[11px] md:text-xs">
-                      {time}
-                    </td>
-                    <td className="px-2 py-1 text-xs">
-                      {isBooked ? booking.name || "(Demo guest)" : "—"}
-                    </td>
-                    <td className="px-2 py-1 text-[11px] hidden md:table-cell">
-                      {isBooked ? booking.email || "demo@example.com" : "—"}
-                    </td>
-                    <td className="px-2 py-1 text-[11px] md:text-xs">
-                      {isBooked ? (
-                        <div className="flex items-center gap-2">
-                          <span className="inline-flex items-center rounded-full bg-emerald-500/15 text-emerald-700 dark:text-emerald-100 px-2 py-0.5">
-                            {copy.statusBooked}
-                          </span>
-                          {onCancelBooking && selectedDayKey && (
-                            <button
-                              type="button"
-                              onClick={() =>
-                                onCancelBooking(selectedDayKey, time)
-                              }
-                              className="text-[10px] text-rose-600 dark:text-rose-200 hover:text-rose-800 dark:hover:text-rose-100 underline"
-                            >
-                              {copy.cancelLabel}
-                            </button>
-                          )}
-                        </div>
-                      ) : (
-                        <span className="inline-flex items-center rounded-full bg-slate-500/10 text-slate-700 dark:text-slate-100 px-2 py-0.5">
-                          {copy.statusAvailable}
-                        </span>
-                      )}
-                    </td>
-                  </tr>
-                );
-              })}
-            </tbody>
-          </table>
-        </div>
-      ) : (
+      {!selectedDate || !infoForSelected ? (
         <p className={"text-xs " + mutedText}>{copy.noDateSelected}</p>
+      ) : (
+        <div className="space-y-2">
+          {slotTimes.map((time) => {
+            const booking = infoForSelected.bookings?.[time];
+            const isBooked = !!booking;
+
+            if (!isBooked) {
+              return (
+                <div key={time} className={cardBase}>
+                  <div className="flex items-start justify-between gap-3">
+                    <div className="min-w-0">
+                      <div className="flex items-center gap-3">
+                        <div
+                          className={
+                            timeText + " text-slate-600 dark:text-slate-300"
+                          }
+                        >
+                          {time}
+                        </div>
+                        <div className="text-sm text-slate-400 dark:text-slate-500">
+                          —
+                        </div>
+                      </div>
+                    </div>
+
+                    <span
+                      className={
+                        "inline-flex items-center rounded-full border px-2 py-0.5 text-[11px] font-semibold " +
+                        "border-slate-500/20 bg-slate-500/10 text-slate-700 dark:text-slate-100"
+                      }
+                    >
+                      {copy.statusAvailable}
+                    </span>
+                  </div>
+                </div>
+              );
+            }
+
+            const status = booking?.status || "booked";
+            const isNoShow = status === "no_show";
+
+            const name = booking?.name?.trim() || "(Demo guest)";
+            const email = booking?.email?.trim() || "demo@example.com";
+
+            return (
+              <div
+                key={time}
+                className={[cardBase, isNoShow ? cardNoShow : ""].join(" ")}
+              >
+                <div className="flex items-start justify-between gap-3">
+                  <div className="min-w-0">
+                    <div className="flex items-center gap-3 min-w-0">
+                      <div
+                        className={
+                          timeText +
+                          " " +
+                          (isNoShow
+                            ? "text-rose-700 dark:text-rose-200"
+                            : "text-slate-600 dark:text-slate-300")
+                        }
+                      >
+                        {time}
+                      </div>
+
+                      <div className="min-w-0">
+                        <div
+                          className={
+                            nameText + " text-slate-900 dark:text-slate-50"
+                          }
+                        >
+                          {name}
+                        </div>
+                        <div
+                          className={
+                            subText + " text-slate-600 dark:text-slate-300"
+                          }
+                        >
+                          {email}
+                        </div>
+                      </div>
+                    </div>
+                  </div>
+
+                  <span className={isNoShow ? badgeNoShow : badgeBooked}>
+                    <span
+                      className={
+                        "inline-flex h-2 w-2 rounded-full " +
+                        (isNoShow ? "bg-rose-500" : "bg-amber-500")
+                      }
+                    />
+                    {isNoShow ? copy.statusNoShow : copy.statusBooked}
+                  </span>
+                </div>
+
+                <div className="mt-2 flex items-center justify-end">
+                  <button
+                    type="button"
+                    className={btnNoShow}
+                    onClick={() => fireNoShow(selectedDayKey, time)}
+                    disabled={
+                      !selectedDayKey || (!onOpenNoShow && !onSetBookingStatus)
+                    }
+                    style={
+                      !selectedDayKey || (!onOpenNoShow && !onSetBookingStatus)
+                        ? { opacity: 0.5, cursor: "not-allowed" }
+                        : undefined
+                    }
+                  >
+                    {copy.markNoShow}
+                  </button>
+                </div>
+              </div>
+            );
+          })}
+        </div>
       )}
     </div>
   );

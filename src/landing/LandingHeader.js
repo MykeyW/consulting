@@ -85,7 +85,12 @@ function LandingHeader() {
           >
             {lang === "en" ? "Job report demo" : "Démo rapport avant/après"}
           </Link>
-
+          <Link
+            to="/smart-number"
+            className="hover:text-sky-500 transition-colors whitespace-nowrap"
+          >
+            {lang === "en" ? "Smart number demo" : "Démo numéro intelligent"}
+          </Link>
           <a
             href="#contact"
             className={
@@ -219,7 +224,14 @@ function LandingHeader() {
                       ? "Job report demo"
                       : "Démo rapport avant/après"}
                   </Link>
-
+                  <Link
+                    to="/smart-number"
+                    className="hover:text-sky-500 transition-colors whitespace-nowrap"
+                  >
+                    {lang === "en"
+                      ? "Smart number demo"
+                      : "Démo numéro intelligent"}
+                  </Link>
                   <a
                     href="#contact"
                     onClick={() => setMobileOpen(false)}

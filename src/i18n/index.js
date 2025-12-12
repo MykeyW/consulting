@@ -6,6 +6,8 @@ import { bookingEn } from "./booking.en";
 import { bookingFr } from "./booking.fr";
 import { quote_en } from "./quote.en";
 import { quote_fr } from "./quote.fr";
+import { smartNumberEn } from "./smartNumber.en";
+import { smartNumberFr } from "./smartNumber.fr";
 
 // ⬇️ NEW
 import { jobReportEn } from "./jobReport.en";
@@ -16,13 +18,15 @@ export const translations = {
     ...landingEn,
     ...bookingEn,
     ...quote_en,
-    ...jobReportEn, // ⬅️ NEW
+    ...jobReportEn,
+    ...smartNumberEn,
   },
   fr: {
     ...landingFr,
     ...bookingFr,
     ...quote_fr,
-    ...jobReportFr, // ⬅️ NEW
+    ...jobReportFr,
+    ...smartNumberFr,
   },
 };
 

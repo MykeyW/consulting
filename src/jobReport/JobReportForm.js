@@ -1,23 +1,19 @@
-// src/jobReport/JobReportForm.js
 import React from "react";
 import { useLangTheme } from "../landing/LangThemeProvider";
 
 export default function JobReportForm({ job, onChange }) {
   const { t } = useLangTheme();
 
-  const safeJob = job || {
-    clientName: "",
-    clientEmail: "",
-    jobAddress: "",
-    jobDate: new Date().toISOString().slice(0, 10),
-    description: "",
-    beforePhotos: [],
-    afterPhotos: [],
-  };
+  if (!job) {
+    return (
+      <div className="text-sm text-slate-400 border border-slate-800 rounded-md p-3 bg-slate-950">
+        Open a draft or create a new job to edit details.
+      </div>
+    );
+  }
 
   const updateJob = (patch) => {
-    const next = { ...safeJob, ...patch };
-    onChange?.(next);
+    onChange?.({ ...job, ...patch });
   };
 
   const handleTextChange = (e) => {
@@ -29,7 +25,7 @@ export default function JobReportForm({ job, onChange }) {
     const files = Array.from(e.target.files || []);
     if (!files.length) return;
 
-    const existing = safeJob[type] || [];
+    const existing = job[type] || [];
 
     const mapped = files.map((file) => ({
       file,
@@ -37,10 +33,8 @@ export default function JobReportForm({ job, onChange }) {
       id: `${type}-${file.name}-${file.lastModified}-${Math.random()}`,
     }));
 
-    // APPEND instead of replace
     updateJob({ [type]: [...existing, ...mapped] });
 
-    // optional: allow selecting same file again
     e.target.value = "";
   };
 
@@ -52,53 +46,55 @@ export default function JobReportForm({ job, onChange }) {
     >
       <div>
         <label className="block text-xs text-slate-400 mb-1">
-          {t.jobReport_form_clientName}
+          {t?.jobReport_form_clientName || "Client name"}
         </label>
         <input
           name="clientName"
-          value={safeJob.clientName}
+          value={job.clientName}
           onChange={handleTextChange}
           className="w-full rounded-md bg-slate-950 border border-slate-700 px-2 py-1 text-sm focus:outline-none focus:ring-1 focus:ring-emerald-500"
-          placeholder={t.jobReport_form_clientName_placeholder}
+          placeholder={t?.jobReport_form_clientName_placeholder || "John Doe"}
         />
       </div>
 
       <div>
         <label className="block text-xs text-slate-400 mb-1">
-          {t.jobReport_form_clientEmail}
+          {t?.jobReport_form_clientEmail || "Client email"}
         </label>
         <input
           name="clientEmail"
           type="email"
-          value={safeJob.clientEmail}
+          value={job.clientEmail}
           onChange={handleTextChange}
           className="w-full rounded-md bg-slate-950 border border-slate-700 px-2 py-1 text-sm focus:outline-none focus:ring-1 focus:ring-emerald-500"
-          placeholder={t.jobReport_form_clientEmail_placeholder}
+          placeholder={
+            t?.jobReport_form_clientEmail_placeholder || "client@email.com"
+          }
         />
       </div>
 
       <div>
         <label className="block text-xs text-slate-400 mb-1">
-          {t.jobReport_form_address}
+          {t?.jobReport_form_address || "Address"}
         </label>
         <input
           name="jobAddress"
-          value={safeJob.jobAddress}
+          value={job.jobAddress}
           onChange={handleTextChange}
           className="w-full rounded-md bg-slate-950 border border-slate-700 px-2 py-1 text-sm focus:outline-none focus:ring-1 focus:ring-emerald-500"
-          placeholder={t.jobReport_form_address_placeholder}
+          placeholder={t?.jobReport_form_address_placeholder || "123 Main St"}
         />
       </div>
 
       <div className="flex gap-2">
         <div className="flex-1">
           <label className="block text-xs text-slate-400 mb-1">
-            {t.jobReport_form_date}
+            {t?.jobReport_form_date || "Job date"}
           </label>
           <input
             type="date"
             name="jobDate"
-            value={safeJob.jobDate}
+            value={job.jobDate}
             onChange={handleTextChange}
             className="w-full rounded-md bg-slate-950 border border-slate-700 px-2 py-1 text-sm focus:outline-none focus:ring-1 focus:ring-emerald-500"
           />
@@ -107,21 +103,23 @@ export default function JobReportForm({ job, onChange }) {
 
       <div>
         <label className="block text-xs text-slate-400 mb-1">
-          {t.jobReport_form_description}
+          {t?.jobReport_form_description || "Description"}
         </label>
         <textarea
           name="description"
-          value={safeJob.description}
+          value={job.description}
           onChange={handleTextChange}
           rows={3}
           className="w-full rounded-md bg-slate-950 border border-slate-700 px-2 py-1 text-sm focus:outline-none focus:ring-1 focus:ring-emerald-500"
-          placeholder={t.jobReport_form_description_placeholder}
+          placeholder={
+            t?.jobReport_form_description_placeholder || "Work performed…"
+          }
         />
       </div>
 
       <div>
         <label className="block text-xs text-slate-400 mb-1">
-          {t.jobReport_form_before}
+          {t?.jobReport_form_before || "Before photos"}
         </label>
         <input
           type="file"
@@ -130,16 +128,16 @@ export default function JobReportForm({ job, onChange }) {
           onChange={(e) => handleFileChange(e, "beforePhotos")}
           className="w-full text-xs text-slate-300"
         />
-        {safeJob.beforePhotos?.length > 0 && (
+        {!!job.beforePhotos?.length && (
           <p className="text-[11px] text-slate-500 mt-1">
-            {safeJob.beforePhotos.length} {t.jobReport_form_filesSelected}
+            {job.beforePhotos.length} files selected
           </p>
         )}
       </div>
 
       <div>
         <label className="block text-xs text-slate-400 mb-1">
-          {t.jobReport_form_after}
+          {t?.jobReport_form_after || "After photos"}
         </label>
         <input
           type="file"
@@ -148,9 +146,9 @@ export default function JobReportForm({ job, onChange }) {
           onChange={(e) => handleFileChange(e, "afterPhotos")}
           className="w-full text-xs text-slate-300"
         />
-        {safeJob.afterPhotos?.length > 0 && (
+        {!!job.afterPhotos?.length && (
           <p className="text-[11px] text-slate-500 mt-1">
-            {safeJob.afterPhotos.length} {t.jobReport_form_filesSelected}
+            {job.afterPhotos.length} files selected
           </p>
         )}
       </div>
